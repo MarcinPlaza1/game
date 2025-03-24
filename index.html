@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower Defense</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        #emergency-button {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #ff3333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 2000;
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+        
+        #emergency-button:hover {
+            background-color: #ff0000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+    <div id="emergency-button">URUCHOM GRĘ (AWARYJNY)</div>
+    
+    <script>
+        // Awaryjny przycisk uruchamiający grę
+        document.getElementById('emergency-button').addEventListener('click', function() {
+            try {
+                const game = window.game;
+                if (game && game.scene) {
+                    // Próba bezpośredniego uruchomienia GameScene
+                    if (game.scene.isActive('BootScene')) {
+                        game.scene.stop('BootScene');
+                        game.scene.start('GameScene');
+                    } else {
+                        game.scene.start('GameScene');
+                    }
+                } else {
+                    location.reload();
+                }
+            } catch (e) {
+                location.reload();
+            }
+        });
+        
+        // Optymalizacja Canvas2D - bezpieczniejsza wersja
+        try {
+            const originalGetContext = HTMLCanvasElement.prototype.getContext;
+            if (originalGetContext) {
+                HTMLCanvasElement.prototype.getContext = function(type, options) {
+                    if (type === '2d') {
+                        // Dodajemy willReadFrequently aby zoptymalizować getImageData
+                        options = Object.assign({}, options || {}, { willReadFrequently: true });
+                    }
+                    return originalGetContext.call(this, type, options);
+                };
+                console.log("Zastosowano optymalizację Canvas2D");
+            }
+        } catch (error) {
+            console.error("Błąd podczas optymalizacji Canvas2D:", error);
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <script src="js/game.js" type="module"></script>
+</body>
+</html> 
